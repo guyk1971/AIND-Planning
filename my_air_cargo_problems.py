@@ -199,8 +199,17 @@ class AirCargoProblem(Problem):
         conditions by ignoring the preconditions required for an action to be
         executed.
         """
+
         # TODO implement (see Russell-Norvig Ed-3 10.2.3  or Russell-Norvig Ed-2 11.2)
+        # since we're removing all preconditions, we assume all actions are applicable from each state.
+        # and in every step we take an action that satissfy one goal.
+        # so the minimum number of actions is actually the number of unsatissfied goal statements in the current state
+        kb = PropKB()
+        kb.tell(decode_state(node.state, self.state_map).pos_sentence())
         count = 0
+        for clause in self.goal:
+            if clause not in kb.clauses:
+                count += 1
         return count
 
 
