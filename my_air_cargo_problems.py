@@ -128,13 +128,16 @@ class AirCargoProblem(Problem):
         # TODO implement
         # decode the state string
         fs = decode_state(state,self.state_map)
+        # define a knowledgebase
         kb=PropKB(fs.sentence())
         # an action is applicable in a state if the preconditions are satissfied by the state
         all_actions = self.get_actions()
+        # can be done using list comprehension
 #        possible_actions = [a for a in all_actions if a.check_precod(kb,a.args)]
+		# or at the regular way : 
         possible_actions=[]
         for a in all_actions:
-            if a.check_precond(kb,a.args):
+            if a.check_precond(kb,a.args):		# if preconditions are met, add the action to the list of applicable actions 
                 possible_actions.append(a)
         return possible_actions
 
@@ -149,7 +152,7 @@ class AirCargoProblem(Problem):
         """
         # TODO implement
         # assert(action in self.actions(state))  #todo need to find a way to compare actions
-        new_state=decode_state(state,self.state_map)
+        new_state=decode_state(state,self.state_map)	# first copy the state to a new state. ("close world" assumption)
         for eff in action.effect_rem:
             # remove from POS
             new_state.pos.remove(eff)

@@ -313,9 +313,9 @@ class PlanningGraph():
         a_nodes = []
         for action in self.all_actions:
             a = PgNode_a(action)
-            if a.prenodes.issubset(self.s_levels[level]):
-                a_nodes.append(a)
-                for s in self.s_levels[level]:
+            if a.prenodes.issubset(self.s_levels[level]): #check that the literals for the action holds in S[level]
+                a_nodes.append(a)   # add to the list of applicable actions in the current level
+                for s in self.s_levels[level]:  # connect parents and children in the planning graph
                     s.children.add(a)
                     a.parents.add(s)
         # append the a_nodes to the levels list
@@ -405,11 +405,15 @@ class PlanningGraph():
         :return: bool
         """
         # test for Inconsistent Effects between nodes
-        a1_eff_add = set(node_a1.action.effect_add)
-        a1_eff_rem = set(node_a1.action.effect_rem)
+        a1_eff_add = set(node_a1.action.effect_add) 
+        a1_eff_rem = set(node_a1.action.effect_rem) 
 
         a2_eff_add = set(node_a2.action.effect_add)
         a2_eff_rem = set(node_a2.action.effect_rem)
+
+        # if the add effects set of a1 and rem effects set of a2 are disjoint 
+        # and the add effects set of a2 and the rem effects set of a1 are disjoint
+        # then neither negates the effect of the other. so we need to return the not os this case
 
         return not(a1_eff_add.isdisjoint(a2_eff_rem) and a1_eff_rem.isdisjoint(a2_eff_add))
 
@@ -439,7 +443,9 @@ class PlanningGraph():
         a2_precond_pos = set(node_a2.action.precond_pos)
         a2_precond_neg = set(node_a2.action.precond_neg)
 
+        # the effect of a1 negates a precondition of a2
         a1_neg_a2 = not (a1_eff_add.isdisjoint(a2_precond_neg) and a1_eff_rem.isdisjoint(a2_precond_pos))
+        # the effect of a2 negates a precondition of a1
         a2_neg_a1 = not (a2_eff_add.isdisjoint(a1_precond_neg) and a2_eff_rem.isdisjoint(a1_precond_pos))
 
         return a1_neg_a2 or a2_neg_a1
@@ -531,7 +537,7 @@ class PlanningGraph():
         level_sum = 0
         # for each goal in the problem, determine the level cost, then add them together
         for goal in self.problem.goal:
-            found = False
+            found = False   # indicate that the goal was found
             for l,sl in enumerate(self.s_levels):
                 for s in sl:
                     if goal == s.symbol and s.is_pos:
